@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser')
 
 const app = express();
-const port = 5000;
+
 const dotenv = require('dotenv');
 const BusRoute = require('./schema');
 const cors = require('cors');
@@ -13,7 +13,7 @@ app.use(cors());
 
 dotenv.config();
 const uri = process.env.MONGO;
-
+const port = process.env.PORT;
 // Connect to MongoDB
 const mongoConnect = async () => {
     console.log("first");
