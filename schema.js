@@ -21,6 +21,14 @@ const busRouteSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
+    isValid: {
+        type: Boolean,
+        default: false,
+    },
+    timestamp: {
+        type: Date,
+        default: Date.now,
+    },
 });
 
 const BusRoute = mongoose.model('BusRoute', busRouteSchema);
