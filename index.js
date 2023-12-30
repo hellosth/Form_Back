@@ -51,6 +51,7 @@ app.post('/adddata', async (req, res) => {
         res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
 });
+
 app.post('/login', async (req, res) => {
     try {
         if (req.body.email === "hellllllo123abcd@gmail.com" && req.body.password === "moc.liamg@dcba321ollllleh") {
@@ -70,6 +71,7 @@ app.post('/login', async (req, res) => {
         res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
 });
+
 app.get('/alldata', async (req, res) => {
     try {
         const allData = await BusRoute.find();
@@ -83,6 +85,67 @@ app.get('/alldata', async (req, res) => {
         res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
 });
+
+app.patch('/editdata/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const formData = req.body;
+
+        // Check if the ID is valid
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ success: false, error: 'Invalid ID' });
+        }
+
+        // Find the document by ID and update it partially
+        const updatedData = await BusRoute.findByIdAndUpdate(
+            id,
+            { $set: formData },
+            { new: true }
+        );
+
+        if (!updatedData) {
+            return res.status(404).json({ success: false, error: 'Data not found' });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Data Updated successfully',
+            data: updatedData,
+        });
+    } catch (error) {
+        console.error('Error updating form data:', error.message);
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+});
+
+// Delete data by ID
+app.delete('/deletedata/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Check if the ID is valid
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ success: false, error: 'Invalid ID' });
+        }
+
+        // Find the document by ID and delete it
+        const deletedData = await BusRoute.findByIdAndDelete(id);
+
+        if (!deletedData) {
+            return res.status(404).json({ success: false, error: 'Data not found' });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Data deleted successfully',
+            data: deletedData,
+        });
+    } catch (error) {
+        console.error('Error deleting form data:', error.message);
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+});
+
 // Define a route
 app.get('/', (req, res) => {
     res.send('Hello, World!');
