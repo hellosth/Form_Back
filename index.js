@@ -8,6 +8,8 @@ const app = express();
 
 const dotenv = require('dotenv');
 const BusRoute = require('./schema');
+const StopRoute=require('./stopSchema')
+
 const cors = require('cors');
 app.use(cors());
 
@@ -36,6 +38,7 @@ db.once('open', () => {
     console.log('Connected to MongoDB');
 });
 
+//FrontEnd Form
 app.post('/adddata', async (req, res) => {
     try {
         const formData = req.body;
@@ -71,6 +74,7 @@ app.post('/login', async (req, res) => {
         res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
 });
+
 
 app.get('/alldata', async (req, res) => {
     try {
@@ -145,6 +149,95 @@ app.delete('/deletedata/:id', async (req, res) => {
         res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
 });
+
+
+//LatLong Add
+app.post('/addstop', async (req, res) => {
+    try {
+        const formData = req.body;
+        const busRoute = new StopRoute(formData);
+        await busRoute.save();
+        res.status(200).json({
+            success: true,
+            message: 'Added!!!!',
+            data: busRoute,
+        });
+    } catch (error) {
+        console.error('Error saving form data:', error.message);
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+});
+app.patch('/editstop/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const formData = req.body;
+
+        // Check if the ID is valid
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ success: false, error: 'Invalid ID' });
+        }
+
+        // Find the document by ID and update it partially
+        const updatedData = await StopRoute.findByIdAndUpdate(
+            id,
+            { $set: formData },
+            { new: true }
+        );
+
+        if (!updatedData) {
+            return res.status(404).json({ success: false, error: 'Data not found' });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Data Updated successfully',
+            data: updatedData,
+        });
+    } catch (error) {
+        console.error('Error updating form data:', error.message);
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+});
+app.delete('/deletestop/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Check if the ID is valid
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ success: false, error: 'Invalid ID' });
+        }
+
+        // Find the document by ID and delete it
+        const deletedData = await StopRoute.findByIdAndDelete(id);
+
+        if (!deletedData) {
+            return res.status(404).json({ success: false, error: 'Data not found' });
+        }
+        res.status(200).json({
+            success: true,
+            message: 'Data deleted successfully',
+            data: deletedData,
+        });
+    } catch (error) {
+        console.error('Error deleting form data:', error.message);
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+});
+app.get('/allstops', async (req, res) => {
+    try {
+        const allData = await StopRoute.find();
+        res.status(200).json({
+            success: true,
+            message: 'All data retrieved successfully',
+            data: allData,
+        });
+    } catch (error) {
+        console.error('Error retrieving all data:', error.message);
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+});
+
+
 
 // Define a route
 app.get('/', (req, res) => {
